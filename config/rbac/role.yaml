@@ -1,0 +1,86 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - pagerduty.platform.share-now.com
+  resources:
+  - escalationpolicies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - pagerduty.platform.share-now.com
+  resources:
+  - escalationpolicies/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - pagerduty.platform.share-now.com
+  resources:
+  - escalationpolicies/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - pagerduty.platform.share-now.com
+  resources:
+  - pagerdutyservices
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - pagerduty.platform.share-now.com
+  resources:
+  - pagerdutyservices/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - pagerduty.platform.share-now.com
+  resources:
+  - pagerdutyservices/status
+  verbs:
+  - get
+  - patch
+  - update

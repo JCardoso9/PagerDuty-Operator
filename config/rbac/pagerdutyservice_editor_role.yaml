@@ -1,0 +1,31 @@
+# permissions for end users to edit pagerdutyservices.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: pagerdutyservice-editor-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: pagerduty-operator
+    app.kubernetes.io/part-of: pagerduty-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: pagerdutyservice-editor-role
+rules:
+- apiGroups:
+  - pagerduty.platform.share-now.com
+  resources:
+  - pagerdutyservices
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - pagerduty.platform.share-now.com
+  resources:
+  - pagerdutyservices/status
+  verbs:
+  - get

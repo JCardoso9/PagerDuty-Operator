@@ -1,0 +1,184 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.11.1
+  creationTimestamp: null
+  name: pagerdutyservices.pagerduty.platform.share-now.com
+spec:
+  group: pagerduty.platform.share-now.com
+  names:
+    kind: PagerdutyService
+    listKind: PagerdutyServiceList
+    plural: pagerdutyservices
+    singular: pagerdutyservice
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: PagerdutyService is the Schema for the pagerdutyservices API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: PagerdutyServiceSpec defines the desired state of PagerdutyService
+            properties:
+              acknowledgement_timeout:
+                default: 1800
+                description: Time in seconds that an incident changes to the Triggered
+                  State after being Acknowledged. Value is null if the feature is
+                  disabled. Value must not be negative. Setting this field to 0, null
+                  (or unset in POST request) will disable the feature.
+                minimum: 0
+                type: integer
+              alert_creation:
+                description: Whether a service creates only incidents, or both alerts
+                  and incidents. A service must create alerts in order to enable incident
+                  merging. "create_incidents" - The service will create one incident
+                  and zero alerts for each incoming event. "create_alerts_and_incidents"
+                  - The service will create one incident and one associated alert
+                  for each incoming event.
+                enum:
+                - create_incidents
+                - create_alerts_and_incidents
+                type: string
+              auto_pause_notifications:
+                description: Defines how alerts on this service are automatically
+                  suspended for a period of time before triggering, when identified
+                  as likely being transient. Note that automatically pausing notifications
+                  is only available on certain plans.
+                properties:
+                  enabled:
+                    default: false
+                    type: boolean
+                  timeout:
+                    enum:
+                    - 120
+                    - 180
+                    - 240
+                    - 300
+                    - 600
+                    - 900
+                    type: integer
+                required:
+                - enabled
+                type: object
+              auto_resolve_timeout:
+                default: 14400
+                description: Time in seconds that an incident is automatically resolved
+                  if left open for that long. Value is null if the feature is disabled.
+                  Value must not be negative. Setting this field to 0, null (or unset
+                  in POST request) will disable the feature
+                minimum: 0
+                type: integer
+              description:
+                description: Description defines the description of the PagerDuty
+                  service that will be created
+                type: string
+              escalation_policy:
+                description: EscalationPolicy defines the escalation policy that will
+                  attributed to the PagerDuty service
+                type: string
+              incident_urgency_rule:
+                properties:
+                  during_support_hours:
+                    description: IncidentUrgencyType are the incidents urgency during
+                      or outside support hours.
+                    properties:
+                      type:
+                        type: string
+                      urgency:
+                        type: string
+                    type: object
+                  outside_support_hours:
+                    description: IncidentUrgencyType are the incidents urgency during
+                      or outside support hours.
+                    properties:
+                      type:
+                        type: string
+                      urgency:
+                        type: string
+                    type: object
+                  type:
+                    type: string
+                  urgency:
+                    type: string
+                type: object
+              name:
+                description: Name defines the name of the PagerDuty service that will
+                  be created
+                type: string
+              scheduled_actions:
+                description: An array containing scheduled actions for the service.
+                items:
+                  description: ScheduledAction contains scheduled actions for the
+                    service.
+                  properties:
+                    at:
+                      description: InlineModel represents when a scheduled action
+                        will occur.
+                      properties:
+                        name:
+                          type: string
+                        type:
+                          type: string
+                      type: object
+                    to_urgency:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - to_urgency
+                  type: object
+                type: array
+              status:
+                default: active
+                description: The current state of the Service.
+                enum:
+                - active
+                - warning
+                - critical
+                - maintenance
+                - disabled
+                type: string
+              support_hours:
+                description: SupportHours are the support hours for the service.
+                properties:
+                  days_of_week:
+                    items:
+                      type: integer
+                    type: array
+                  end_time:
+                    type: string
+                  start_time:
+                    type: string
+                  time_zone:
+                    type: string
+                  type:
+                    type: string
+                type: object
+            type: object
+          status:
+            description: PagerdutyServiceStatus defines the observed state of PagerdutyService
+            properties:
+              service_id:
+                description: ServiceID stores the ID of the created service
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

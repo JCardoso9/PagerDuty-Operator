@@ -1,0 +1,9 @@
+apiVersion: pagerduty.platform.share-now.com/v1alpha1
+kind: PagerdutyService
+metadata:
+  name: my-service
+  namespace: pagerduty-operator-system
+spec:
+  name: Test-Joao
+  description: Test-Joao description
+  escalation_policy: PJLKMZK

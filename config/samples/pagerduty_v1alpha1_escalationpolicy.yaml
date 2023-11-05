@@ -1,0 +1,12 @@
+apiVersion: pagerduty.platform.share-now.com/v1alpha1
+kind: EscalationPolicy
+metadata:
+  labels:
+    app.kubernetes.io/name: escalationpolicy
+    app.kubernetes.io/instance: escalationpolicy-sample
+    app.kubernetes.io/part-of: pagerduty-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: pagerduty-operator
+  name: escalationpolicy-sample
+spec:
+  # TODO(user): Add fields here

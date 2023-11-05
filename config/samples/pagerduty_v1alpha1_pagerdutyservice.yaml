@@ -1,0 +1,12 @@
+apiVersion: pagerduty.platform.share-now.com/v1alpha1
+kind: PagerdutyService
+metadata:
+  labels:
+    app.kubernetes.io/name: pagerdutyservice
+    app.kubernetes.io/instance: pagerdutyservice-sample
+    app.kubernetes.io/part-of: pagerduty-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: pagerduty-operator
+  name: pagerdutyservice-sample
+spec:
+  # TODO(user): Add fields here
