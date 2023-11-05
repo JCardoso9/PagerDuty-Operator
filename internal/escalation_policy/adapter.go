@@ -79,7 +79,6 @@ func (e *EscalationPolicyAdapter) ReconcileDeletion() (pd_utils.OperationResult,
 			if err := e.deletePDEscalationPolicy(); err != nil {
 				e.Logger.Error(err, "Failed to delete escalation policy")
 				return e.SetEscalationPolicyCondition(pdv1alpha1.ConditionReady, escalationPolicyReady, err, "")
-				// return pd_utils.RequeueAfter(5*time.Second, err)
 			}
 		}
 

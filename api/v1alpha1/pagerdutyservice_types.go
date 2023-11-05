@@ -98,7 +98,7 @@ type PagerdutyServiceStatus struct {
 	ServiceID string `json:"service_id,omitempty"`
 
 	// // Conditions store the status conditions of the Service
-	// Conditions []Condition `json:"conditions"`
+	Conditions []metav1.Condition `json:"conditions"`
 }
 
 //+kubebuilder:object:root=true

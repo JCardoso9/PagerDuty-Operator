@@ -1,6 +1,5 @@
-# pagerduty-operator
-The objective of this operator is to simplify the management of pagerduty by allowing services to be deployed alongside applications
-
+# Pagerduty-operator
+The objective of this operator is to simplify the management of pagerduty oncall by allowing applications to be deployed alongside Pagerduty services and the appropriate escalation policies.
 
 ## To do list
 
@@ -9,10 +8,12 @@ The objective of this operator is to simplify the management of pagerduty by all
     - EscalationPolicy subroutines ✅
     - Service subroutines
     - Clean up CRD to PD Object adapter
-3. Add testing
-4. Organize utilities
-5. Add business services
-6. Create helm chart to release
+3. Organize utilities
+4. Semantic versioning
+5. Add testing
+6. Add business services
+7. Create helm chart to release
+8. Pipeline?
 
 
 ## Description

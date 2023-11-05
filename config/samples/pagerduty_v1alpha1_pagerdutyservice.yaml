@@ -7,6 +7,9 @@ metadata:
     app.kubernetes.io/part-of: pagerduty-operator
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: pagerduty-operator
-  name: pagerdutyservice-sample
+  name: my-service
+  namespace: pagerduty-operator-system
 spec:
-  # TODO(user): Add fields here
+  name: Test-Joao
+  description: Test-Joao description
+  escalation_policy: PJLKMZK

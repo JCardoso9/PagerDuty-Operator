@@ -36,7 +36,7 @@ import (
 const service_finalizer = "pagerduty.platform.share-now.com/pagerdutyservice"
 
 // PagerdutyServiceReconciler reconciles a PagerdutyService object
-type PagerdutyServiceReconciler struct {
+type PagerdutyServiceReconciler1 struct {
 	client.Client
 	Scheme   *runtime.Scheme
 	Recorder record.EventRecorder
@@ -65,7 +65,7 @@ type PagerdutyServiceReconciler struct {
 // - About Operator Pattern: https://kubernetes.io/docs/concepts/extend-kubernetes/operator/
 // - About Controllers: https://kubernetes.io/docs/concepts/architecture/controller/
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.1/pkg/reconcile
-func (r *PagerdutyServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *PagerdutyServiceReconciler) Reconcile1(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
 	log.Info("Starting reconcile...")
 
@@ -196,7 +196,7 @@ func (r *PagerdutyServiceReconciler) deletePDService(pdService *pagerdutyalpha1.
 // SetupWithManager sets up the controller with the Manager.
 // Note that the Deployment will be also watched in order to ensure its
 // desirable state on the cluster
-func (r *PagerdutyServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *PagerdutyServiceReconciler) SetupWithManager1(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&pagerdutyalpha1.PagerdutyService{}).
 		Complete(r)
