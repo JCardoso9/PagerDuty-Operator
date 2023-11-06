@@ -40,7 +40,7 @@ func (e *PDServiceAdapter) ReconcileCreation() (pd_utils.OperationResult, error)
 		e.Logger.Info("Upstream PagerDuty Service not found. Creating...")
 
 		// Handles creation of upstream policy
-		serviceID, err := e.createEscalationPolicy()
+		serviceID, err := e.createPDService()
 		if err != nil {
 			e.Logger.Error(err, "Failed to create PagerDuty Service")
 			return e.SetPagerDutyServiceCondition(pdv1alpha1.ConditionReady, pdServiceReady, err, "")
@@ -55,8 +55,25 @@ func (e *PDServiceAdapter) ReconcileCreation() (pd_utils.OperationResult, error)
 	return pd_utils.ContinueProcessing()
 }
 
-func (e *PDServiceAdapter) createEscalationPolicy() (string, error) {
-	panic("implement me")
+func (e *PDServiceAdapter) createPDService() (string, error) {
+	if e.PagerdutyService.Status.ServiceID != "" {
+		e.Logger.Info("PagerDuty Service already exists. Skipping  creation...")
+		return e.PagerdutyService.Status.ServiceID, nil
+	}
+
+	// Handle Escalation Policy
+	// Check if it exists in cluster, if so, add this service
+	// If not then create new escalation policy CRD and wait for it to be created
+	// Get Escalation Policy ID, update this service with the ID
+	// Finally you can create the service
+
+	res, err := e.PD_Client.CreateServiceWithContext(context.TODO(), e.PagerdutyService.Spec.Convert())
+	if err != nil {
+		e.Logger.Error(err, "PagerDuty Service creation unsuccessfull...")
+		return "", err
+	}
+
+	return res.ID, nil
 }
 
 func (e *PDServiceAdapter) ReconcileDeletion() (pd_utils.OperationResult, error) {
@@ -66,11 +83,11 @@ func (e *PDServiceAdapter) ReconcileDeletion() (pd_utils.OperationResult, error)
 		e.Logger.Info("Deletion timestamp found. Deleting...")
 
 		if e.serviceIDExists() {
-			e.Logger.Info("Upstream policy found, making API deletion call for PagerDuty Service ...")
-			// if err := e.deletePDEscalationPolicy(); err != nil {
-			// 	e.Logger.Error(err, "Failed to delete PagerDuty Service")
-			// 	return e.SetEscalationPolicyCondition(pdv1alpha1.ConditionReady, pdServiceReady, err, "")
-			// }
+			e.Logger.Info("Upstream PagerDuty Service found, making API deletion call...")
+			if err := e.deletePDService(); err != nil {
+				e.Logger.Error(err, "Failed to delete PagerDuty Service")
+				return e.SetPagerDutyServiceCondition(pdv1alpha1.ConditionReady, pdServiceReady, err, "")
+			}
 		}
 
 		err := e.removeFinalizer()
@@ -81,27 +98,82 @@ func (e *PDServiceAdapter) ReconcileDeletion() (pd_utils.OperationResult, error)
 	return pd_utils.ContinueProcessing()
 }
 
-func (e *PDServiceAdapter) deletePDEscalationPolicy() error {
-	panic("implement me")
+func (e *PDServiceAdapter) deletePDService() error {
+	e.Logger.Info("Deleting PagerDuty Service...")
+
+	// TODO: Check if it's necessary to delete the escalation policy
+
+	err := e.PD_Client.DeleteServiceWithContext(context.TODO(), e.PagerdutyService.Status.ServiceID)
+	if err != nil {
+		e.Logger.Error(err, "ERROR: Failed to delete PagerDuty Service")
+		return err
+	}
+
+	e.Logger.Info("PagerDuty Service deleted...")
+	return nil
 }
 
 func (e *PDServiceAdapter) ReconcileUpdate() (pd_utils.OperationResult, error) {
+	e.Logger.Info("Reconcile PagerDuty Service Update...")
+
+	if !e.serviceIDExists() {
+		e.Logger.Info("No upstream pagerduty service created yet. Skipping Update...")
+		return pd_utils.ContinueProcessing()
+	}
+
+	changed, err := e.updatePDService()
+	if err != nil {
+		e.Logger.Error(err, "Failed to update PagerDuty Service")
+		return e.SetPagerDutyServiceCondition(pdv1alpha1.ConditionReady, pdServiceReady, err, "")
+	}
+
+	e.Logger.Info("Reconcile Update PagerDuty Service done...")
+	if changed {
+		e.Logger.Info("PagerDuty Service changed...")
+		return e.SetPagerDutyServiceCondition(pdv1alpha1.ConditionReady, pdServiceReady, nil, "PagerDuty Service matches upstream service")
+	}
+
+	e.Logger.Info("PagerDuty Service not changed...")
+	return pd_utils.ContinueProcessing()
+}
+
+func (e *PDServiceAdapter) updatePDService() (bool, error) {
+	PDService, err := e.getPDService(e.PagerdutyService.Status.ServiceID)
+	if err != nil {
+		e.Logger.Error(err, "Failed to get Escalation policy")
+		return false, err
+	}
+
+	k8sPDService := e.PagerdutyService.Spec.Convert()
+	k8sPDService.ID = e.PagerdutyService.Status.ServiceID
+
+	e.Logger.Info("Comparing PagerDuty Service spec with upstream service...")
+	if !e.serviceEqualUpstream(PDService, k8sPDService) {
+		e.Logger.Info("Updating service...")
+		_, err := e.PD_Client.UpdateServiceWithContext(
+			context.TODO(),
+			k8sPDService,
+		)
+
+		if err != nil {
+			e.Logger.Error(err, "API Failed to update PagerDuty Service")
+			return false, err
+		}
+
+		e.Logger.Info("PagerDuty Service updated...")
+		return true, nil
+		// Update condition, call status update
+	}
+
+	e.Logger.Info("CRD of PagerDuty Service matches upstream...")
+	return false, nil
+}
+
+func (e *PDServiceAdapter) serviceEqualUpstream(upstreamPolicy *pagerduty.Service, k8sPolicy pagerduty.Service) bool {
 	panic("implement me")
 }
 
-func (e *PDServiceAdapter) updatePDEscalationPolicy() (bool, error) {
-	panic("implement me")
-}
-
-func (e *PDServiceAdapter) policyEqualUpstream(upstreamPolicy *pagerduty.EscalationPolicy, k8sPolicy pagerduty.EscalationPolicy) bool {
-	panic("implement me")
-}
-
-func (e *PDServiceAdapter) escalationRulesEqual(localPolicy pagerduty.EscalationPolicy, upstreamRules []pagerduty.EscalationRule) bool {
-	panic("implement me")
-}
-
-func (e *PDServiceAdapter) getPDEscalationPolicy(id string) (*pagerduty.Service, error) {
+func (e *PDServiceAdapter) getPDService(id string) (*pagerduty.Service, error) {
 	PDService, err := e.PD_Client.GetServiceWithContext(context.TODO(), id, &pagerduty.GetServiceOptions{})
 	if err != nil {
 		e.Logger.Error(err, "Failed to get PagerDuty Service")
