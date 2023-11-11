@@ -24,7 +24,7 @@ type PagerdutyServiceReconciler struct {
 	Recorder record.EventRecorder
 }
 
-type Adapter interface {
+type Subroutines interface {
 	ReconcileCreation() (pd_utils.OperationResult, error)
 	ReconcileDeletion() (pd_utils.OperationResult, error)
 	ReconcileUpdate() (pd_utils.OperationResult, error)
@@ -74,15 +74,18 @@ func (r *PagerdutyServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return k8s_utils.RequeueWithError(err)
 	}
 
-	adapter := &PDServiceAdapter{
-		Logger:           log,
-		K8sClient:        r.Client,
-		PD_Client:        pagerduty.NewClient(""),
+	subroutineHandler := &SubroutineHandler{
+		Logger:    log,
+		K8sClient: r.Client,
+		PDServiceAdapter: &PDServiceAdapter{
+			Logger:    log,
+			PD_Client: pagerduty.NewClient(""),
+		},
 		PagerdutyService: pdService,
 		conditionManager: condition.NewConditionManager(),
 	}
 
-	result, err := r.ReconcileHandler(adapter)
+	result, err := r.ReconcileHandler(subroutineHandler)
 	// reason := "ReconcileError"
 	// _, _ = adapter.SetProjectClaimCondition(gcpv1alpha1.ConditionError, reason, err)
 
@@ -91,13 +94,13 @@ func (r *PagerdutyServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 
 type ReconcileOperation func() (pd_utils.OperationResult, error)
 
-func (r *PagerdutyServiceReconciler) ReconcileHandler(adapter Adapter) (ctrl.Result, error) {
+func (r *PagerdutyServiceReconciler) ReconcileHandler(subroutines Subroutines) (ctrl.Result, error) {
 	operations := []ReconcileOperation{
-		adapter.Initialization,
-		adapter.AddFinalizer,
-		adapter.ReconcileDeletion,
-		adapter.ReconcileCreation,
-		adapter.ReconcileUpdate,
+		subroutines.Initialization,
+		subroutines.AddFinalizer,
+		subroutines.ReconcileDeletion,
+		subroutines.ReconcileCreation,
+		subroutines.ReconcileUpdate,
 	}
 	for _, operation := range operations {
 		result, err := operation()
@@ -114,6 +117,6 @@ func (r *PagerdutyServiceReconciler) ReconcileHandler(adapter Adapter) (ctrl.Res
 // SetupWithManager sets up the controller with the Manager.
 func (r *PagerdutyServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&pagerdutyalpha1.EscalationPolicy{}).
+		For(&pagerdutyalpha1.PagerdutyService{}).
 		Complete(r)
 }
