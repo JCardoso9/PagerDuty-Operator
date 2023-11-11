@@ -1,6 +1,6 @@
 module gitlab.share-now.com/platform/pagerduty-operator
 
-go 1.19
+go 1.21
 
 require (
 	github.com/PagerDuty/go-pagerduty v1.7.0
