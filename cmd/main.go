@@ -65,7 +65,7 @@ func main() {
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Logger:                 setupLog.WithName("manager-of-pagerduty-service-controller"),
+		Logger:                 setupLog.WithName("manager-of-pagerduty-controller"),
 		Scheme:                 scheme,
 		MetricsBindAddress:     metricsAddr,
 		Port:                   9443,

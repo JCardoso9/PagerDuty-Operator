@@ -76,10 +76,6 @@ type PagerdutyServiceSpec struct {
 	// "create_alerts_and_incidents" - The service will create one incident and one associated alert for each incoming event.
 	// +kubebuilder:validation:Enum=create_incidents;create_alerts_and_incidents
 	AlertCreation string `json:"alert_creation,omitempty"`
-
-	// Defines how alerts on this service are automatically suspended for a period of time before triggering, when identified as likely being transient.
-	// Note that automatically pausing notifications is only available on certain plans.
-	AutoPauseNotificationsParameters *typeinfo.K8sAutoPauseNotificationsParameters `json:"auto_pause_notifications,omitempty"`
 }
 
 // PagerdutyServiceStatus defines the observed state of PagerdutyService

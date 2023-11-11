@@ -6,15 +6,20 @@ import (
 	"github.com/PagerDuty/go-pagerduty"
 )
 
-func (spec *PagerdutyServiceSpec) Convert() pagerduty.Service {
-	return pagerduty.Service{
-		Name:                   spec.Name,
-		Description:            spec.Description,
-		AutoResolveTimeout:     spec.AutoResolveTimeout,
-		AcknowledgementTimeout: spec.AcknowledgementTimeout,
-		EscalationPolicy:       spec.EscalationPolicyID.ToSpecificObject(),
-	}
-}
+// func (spec *PagerdutyServiceSpec) Convert() pagerduty.Service {
+// 	return pagerduty.Service{
+// 		Name:                   spec.Name,
+// 		Description:            spec.Description,
+// 		AutoResolveTimeout:     spec.AutoResolveTimeout,
+// 		AcknowledgementTimeout: spec.AcknowledgementTimeout,
+// 		Status:                 spec.Status,
+// 		SupportHours:           spec.SupportHours.Convert(),
+// 		IncidentUrgencyRule:    spec.IncidentUrgencyRule.Convert(),
+// 		ScheduledActions:       spec.ScheduledActions.Convert(),
+// 		AlertCreation:          spec.AlertCreation,
+// 		EscalationPolicy:       spec.EscalationPolicyID.ToSpecificObject(),
+// 	}
+// }
 
 func (spec *EscalationPolicySpec) Convert() pagerduty.EscalationPolicy {
 	if spec.Team == "" {
