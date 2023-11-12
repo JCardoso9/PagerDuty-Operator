@@ -24,13 +24,15 @@ type EPAdapter struct {
 	PD_Client *pagerduty.Client
 }
 
+var escalation_policy_reference_type = "escalation_policy_reference"
+
 func (adapter *EPAdapter) convert(policy *v1alpha1.EscalationPolicy) pagerduty.EscalationPolicy {
 	if policy.Spec.Team == "" {
 		fmt.Println("------------------------------------ Team is empty")
 		return pagerduty.EscalationPolicy{
 			APIObject: pagerduty.APIObject{
 				ID:   policy.Status.PolicyID,
-				Type: "escalation_policy_reference",
+				Type: escalation_policy_reference_type,
 			},
 			Name:                       policy.Spec.Name,
 			Description:                policy.Spec.Description,
@@ -43,7 +45,7 @@ func (adapter *EPAdapter) convert(policy *v1alpha1.EscalationPolicy) pagerduty.E
 	return pagerduty.EscalationPolicy{
 		APIObject: pagerduty.APIObject{
 			ID:   policy.Status.PolicyID,
-			Type: "escalation_policy_reference",
+			Type: escalation_policy_reference_type,
 		},
 		Name:                       policy.Spec.Name,
 		Description:                policy.Spec.Description,

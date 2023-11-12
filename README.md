@@ -15,6 +15,21 @@ The objective of this operator is to simplify the management of pagerduty oncall
 7. Create helm chart to release
 8. Pipeline?
 
+## Basic structure
+
+![Diagram](./PDoperator.drawio.svg)
+
+The objective of this operator is to allow pagerduty services and business services to be created alongside a deployment of an application, automating the setup of on-call. This ensures that a pagerduty service is specific to the application it is "monitoring".
+
+To this end, the operator consists on a controller that manages three Kubernetes Custom Resources: EscalationPolicies, PagerDutyServices and BusinessServices.
+
+As seen on the image, PagerDuty Services depend on Escalation Policies and Business Services depend on PagerDuty Services. However, any of these objects can be created on their own without referencing anything else.
+
+In terms of how the controllers for a specific resource are structured you can take a look at the top right corner of the image. Each controller has a reconciler which runs the Reconcile() function on a loop whenever there is a Kubernetes event on an observed object.
+
+This reconcile function will run a set of subroutines each time. These subroutines are idempotent functions which will perform certain actions depending on whether the event is relevant to them or not. As an example the basic Create subroutine will execute the creation of a Pagerduty object through the API whenever a new custom resource is created.
+
+In order to decouple the Custom resources from the pagerduty API objects each controller will have an Adapter. This component is responsible for making sure that the information from the Custom resource in Kubernetes can be successfully translated to objects that PagerDuty API understands in order to make the necessary API calls.
 
 ## Description
 // TODO(user): An in-depth paragraph about your project and overview of use

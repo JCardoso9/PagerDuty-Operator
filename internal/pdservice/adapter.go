@@ -22,6 +22,8 @@ type PDServiceAdapter struct {
 	PD_Client *pagerduty.Client
 }
 
+var pdservice_reference_type string = "service"
+
 func (adapter *PDServiceAdapter) convertSpec(spec *v1alpha1.PagerdutyServiceSpec) pagerduty.Service {
 	return pagerduty.Service{
 		Name:                   spec.Name,
@@ -41,7 +43,7 @@ func (adapter *PDServiceAdapter) convert(pdService *v1alpha1.PagerdutyService) p
 	return pagerduty.Service{
 		APIObject: pagerduty.APIObject{
 			ID:   pdService.Status.ServiceID,
-			Type: "service",
+			Type: pdservice_reference_type,
 		},
 		Name:                   pdService.Spec.Name,
 		Description:            pdService.Spec.Description,
