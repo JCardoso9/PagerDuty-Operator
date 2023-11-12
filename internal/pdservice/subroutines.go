@@ -22,6 +22,7 @@ import (
 
 const pdServiceFinalizer = "pagerduty.platform.share-now.com/service"
 const pdServiceReady = "PDServiceReady"
+const RequeWaitTime = time.Second * 10
 
 type SubroutineHandler struct {
 	PagerdutyService *v1alpha1.PagerdutyService
@@ -172,12 +173,16 @@ func (e *SubroutineHandler) SetPagerDutyServiceCondition(conditionType pdv1alpha
 			e.Logger.Error(err, "Failed to update PagerDuty Service to false ready condition ")
 		}
 
-		return pd_utils.RequeueAfter(time.Second*10, err)
+		return pd_utils.RequeueAfter(RequeWaitTime, err)
 	}
 
 	// Same condition as before, stop processing
 	if len(*conditions) > 0 && (*conditions)[0].Status == metav1.ConditionTrue && (*conditions)[0].Message == message {
 		err = e.StatusUpdate()
+		if err != nil {
+			e.Logger.Error(err, "Failed to update PagerDuty Service to true ready condition ")
+			return pd_utils.RequeueAfter(RequeWaitTime, err)
+		}
 		return pd_utils.StopProcessing()
 	}
 

@@ -17,6 +17,6 @@ spec:
     - escalation_delay_in_minutes: 5
       targets:
         - P1NKFZC  
-    # - escalation_delay_in_minutes: 20
-    #   targets:
-    #     - PW01E65
+    - escalation_delay_in_minutes: 20
+      targets:
+        - PW01E65

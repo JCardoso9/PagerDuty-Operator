@@ -34,10 +34,12 @@ type PagerdutyServiceSpec struct {
 
 	// Name defines the name of the PagerDuty service that will be created
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// +kubebuilder:validation:Required
 	Name string `json:"name,omitempty"`
 
 	// Description defines the description of the PagerDuty service that will be created
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// +kubebuilder:default=""
 	Description string `json:"description,omitempty"`
 
 	// Time in seconds that an incident is automatically resolved if left open for that long.
@@ -61,20 +63,15 @@ type PagerdutyServiceSpec struct {
 
 	// EscalationPolicy defines the escalation policy that will attributed to the PagerDuty service
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// +kubebuilder:validation:Required
 	EscalationPolicyID typeinfo.EscalationPolicyID `json:"escalation_policy,omitempty"`
-
-	SupportHours *typeinfo.K8sSupportHours `json:"support_hours,omitempty"`
-
-	IncidentUrgencyRule *typeinfo.K8sIncidentUrgencyRule `json:"incident_urgency_rule,omitempty"`
-
-	// An array containing scheduled actions for the service.
-	ScheduledActions []typeinfo.ScheduledAction `json:"scheduled_actions,omitempty"`
 
 	// Whether a service creates only incidents, or both alerts and incidents.
 	// A service must create alerts in order to enable incident merging.
 	// "create_incidents" - The service will create one incident and zero alerts for each incoming event.
 	// "create_alerts_and_incidents" - The service will create one incident and one associated alert for each incoming event.
 	// +kubebuilder:validation:Enum=create_incidents;create_alerts_and_incidents
+	// +kubebuilder:default=create_incidents
 	AlertCreation string `json:"alert_creation,omitempty"`
 }
 

@@ -31,11 +31,8 @@ func (adapter *PDServiceAdapter) convertSpec(spec *v1alpha1.PagerdutyServiceSpec
 		AutoResolveTimeout:     spec.AutoResolveTimeout,
 		AcknowledgementTimeout: spec.AcknowledgementTimeout,
 		Status:                 spec.Status,
-		// SupportHours:           spec.SupportHours.Convert(),
-		// IncidentUrgencyRule:    spec.IncidentUrgencyRule.Convert(),
-		// ScheduledActions:       spec.ScheduledActions.Convert(),
-		AlertCreation:    spec.AlertCreation,
-		EscalationPolicy: spec.EscalationPolicyID.ToSpecificObject(),
+		AlertCreation:          spec.AlertCreation,
+		EscalationPolicy:       spec.EscalationPolicyID.ToSpecificObject(),
 	}
 }
 
@@ -50,11 +47,8 @@ func (adapter *PDServiceAdapter) convert(pdService *v1alpha1.PagerdutyService) p
 		AutoResolveTimeout:     pdService.Spec.AutoResolveTimeout,
 		AcknowledgementTimeout: pdService.Spec.AcknowledgementTimeout,
 		Status:                 pdService.Spec.Status,
-		// SupportHours:           pdService.SupportHours.Convert(),
-		// IncidentUrgencyRule:    pdService.IncidentUrgencyRule.Convert(),
-		// ScheduledActions:       pdService.ScheduledActions.Convert(),
-		AlertCreation:    pdService.Spec.AlertCreation,
-		EscalationPolicy: pdService.Spec.EscalationPolicyID.ToSpecificObject(),
+		AlertCreation:          pdService.Spec.AlertCreation,
+		EscalationPolicy:       pdService.Spec.EscalationPolicyID.ToSpecificObject(),
 	}
 }
 
@@ -119,18 +113,14 @@ func (adapter *PDServiceAdapter) EqualToUpstream(k8sPDService *v1alpha1.Pagerdut
 		adapter.Logger.Error(err, "Failed to get Escalation policy")
 		return false, err
 	}
-
 	convertedk8sPDService := adapter.convert(k8sPDService)
-	return convertedk8sPDService.Name == PDService.Name, nil //&&
-	// k8sService.Description == upstreamService.Description &&
-	// k8sService.AutoResolveTimeout == upstreamService.AutoResolveTimeout &&
-	// k8sService.AcknowledgementTimeout == upstreamService.AcknowledgementTimeout &&
-	// k8sService.Status == upstreamService.Status &&
-	// k8sService.SupportHours == upstreamService.SupportHours &&
-	// k8sService.IncidentUrgencyRule == upstreamService.IncidentUrgencyRule &&
-	// k8sService.AlertCreation == upstreamService.AlertCreation &&
+
+	return convertedk8sPDService.Name == PDService.Name &&
+		convertedk8sPDService.Description == PDService.Description &&
+		*convertedk8sPDService.AutoResolveTimeout == *PDService.AutoResolveTimeout &&
+		*convertedk8sPDService.AcknowledgementTimeout == *PDService.AcknowledgementTimeout &&
+		convertedk8sPDService.Status == PDService.Status &&
+		convertedk8sPDService.AlertCreation == PDService.AlertCreation, nil
 	// k8sService.EscalationPolicy.ID == upstreamService.EscalationPolicy.ID &&
-	// k8sService.AutoPauseNotificationsParameters == upstreamService.AutoPauseNotificationsParameters &&
-	// e.scheduledActionsEqual(k8sService, upstreamService.ScheduledActions)
 
 }

@@ -44,6 +44,7 @@ spec:
                 minimum: 0
                 type: integer
               alert_creation:
+                default: create_incidents
                 description: Whether a service creates only incidents, or both alerts
                   and incidents. A service must create alerts in order to enable incident
                   merging. "create_incidents" - The service will create one incident
@@ -54,27 +55,6 @@ spec:
                 - create_incidents
                 - create_alerts_and_incidents
                 type: string
-              auto_pause_notifications:
-                description: Defines how alerts on this service are automatically
-                  suspended for a period of time before triggering, when identified
-                  as likely being transient. Note that automatically pausing notifications
-                  is only available on certain plans.
-                properties:
-                  enabled:
-                    default: false
-                    type: boolean
-                  timeout:
-                    enum:
-                    - 120
-                    - 180
-                    - 240
-                    - 300
-                    - 600
-                    - 900
-                    type: integer
-                required:
-                - enabled
-                type: object
               auto_resolve_timeout:
                 default: 14400
                 description: Time in seconds that an incident is automatically resolved
@@ -84,6 +64,7 @@ spec:
                 minimum: 0
                 type: integer
               description:
+                default: ""
                 description: Description defines the description of the PagerDuty
                   service that will be created
                 type: string
@@ -91,58 +72,10 @@ spec:
                 description: EscalationPolicy defines the escalation policy that will
                   attributed to the PagerDuty service
                 type: string
-              incident_urgency_rule:
-                properties:
-                  during_support_hours:
-                    description: IncidentUrgencyType are the incidents urgency during
-                      or outside support hours.
-                    properties:
-                      type:
-                        type: string
-                      urgency:
-                        type: string
-                    type: object
-                  outside_support_hours:
-                    description: IncidentUrgencyType are the incidents urgency during
-                      or outside support hours.
-                    properties:
-                      type:
-                        type: string
-                      urgency:
-                        type: string
-                    type: object
-                  type:
-                    type: string
-                  urgency:
-                    type: string
-                type: object
               name:
                 description: Name defines the name of the PagerDuty service that will
                   be created
                 type: string
-              scheduled_actions:
-                description: An array containing scheduled actions for the service.
-                items:
-                  description: ScheduledAction contains scheduled actions for the
-                    service.
-                  properties:
-                    at:
-                      description: InlineModel represents when a scheduled action
-                        will occur.
-                      properties:
-                        name:
-                          type: string
-                        type:
-                          type: string
-                      type: object
-                    to_urgency:
-                      type: string
-                    type:
-                      type: string
-                  required:
-                  - to_urgency
-                  type: object
-                type: array
               status:
                 default: active
                 description: The current state of the Service.
@@ -153,22 +86,6 @@ spec:
                 - maintenance
                 - disabled
                 type: string
-              support_hours:
-                description: SupportHours are the support hours for the service.
-                properties:
-                  days_of_week:
-                    items:
-                      type: integer
-                    type: array
-                  end_time:
-                    type: string
-                  start_time:
-                    type: string
-                  time_zone:
-                    type: string
-                  type:
-                    type: string
-                type: object
             type: object
           status:
             description: PagerdutyServiceStatus defines the observed state of PagerdutyService

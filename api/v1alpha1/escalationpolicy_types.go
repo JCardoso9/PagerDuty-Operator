@@ -42,10 +42,12 @@ type EscalationPolicySpec struct {
 
 	// Name defines the name of the Escalation Policy that will be created
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// +kubebuilder:validation:Required
 	Name string `json:"name,omitempty"`
 
 	// Description defines the description of the Escalation Policy that will be created
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
+	// +kubebuilder:default=""
 	Description string `json:"description,omitempty"`
 
 	// Determines how on call handoff notifications will be sent for users on the escalation policy.
@@ -60,6 +62,7 @@ type EscalationPolicySpec struct {
 	NumLoops uint `json:"num_loops,omitempty"`
 
 	// EscalationRules defines the rules of the Escalation Policy
+	// +kubebuilder:validation:Required
 	EscalationRules typeinfo.K8sEscalationRuleList `json:"escalation_rules,omitempty"`
 
 	// Team associated with the policy. Account must have the teams ability to use this parameter.

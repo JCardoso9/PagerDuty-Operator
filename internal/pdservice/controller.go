@@ -75,7 +75,7 @@ func (r *PagerdutyServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	}
 
 	subroutineHandler := &SubroutineHandler{
-		Logger:    log,
+		Logger:    log.WithName("pdservice controller"),
 		K8sClient: r.Client,
 		PDServiceAdapter: &PDServiceAdapter{
 			Logger:    log,

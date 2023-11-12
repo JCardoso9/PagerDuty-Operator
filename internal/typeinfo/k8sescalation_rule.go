@@ -24,7 +24,23 @@ func (rules K8sEscalationRuleList) ConvertToPagerDutyObj() []pagerduty.Escalatio
 		pdRules = append(pdRules, rule.ConvertToPagerDutyObj())
 	}
 	return pdRules
+}
 
+func (rule *K8sEscalationRule) CompareAPIObject(apiObject pagerduty.EscalationRule) bool {
+	return rule.Delay == apiObject.Delay &&
+		rule.Targets.compareAPIObject(apiObject.Targets)
+}
+
+func (rule K8sEscalationRuleList) CompareAPIObject(apiObject []pagerduty.EscalationRule) bool {
+	if len(rule) != len(apiObject) {
+		return false
+	}
+	for i, r := range rule {
+		if !r.CompareAPIObject(apiObject[i]) {
+			return false
+		}
+	}
+	return true
 }
 
 // Deepcopy

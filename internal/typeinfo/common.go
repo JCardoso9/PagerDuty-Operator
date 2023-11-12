@@ -13,7 +13,7 @@ const (
 
 func ConvertTargets(ids []UserID) ([]pagerduty.APIObject, error) {
 	if len(ids) < MinimumEscalationRuleTargets || len(ids) > MaximumEscalationRuleTargets {
-		return nil, fmt.Errorf("Invalid number of targets: %d", len(ids))
+		return nil, fmt.Errorf("invalid number of targets: %d", len(ids))
 	}
 	targets := make([]pagerduty.APIObject, len(ids))
 	for i, id := range ids {
@@ -149,4 +149,22 @@ func (id UserID) ToSpecificObject() pagerduty.User {
 			Type: "user_reference",
 		},
 	}
+}
+
+///// Comparison functions
+
+func (id UserID) compareAPIObject(apiObject pagerduty.APIObject) bool {
+	return string(id) == apiObject.ID && "user_reference" == apiObject.Type
+}
+
+func (ids UserIDList) compareAPIObject(apiObject []pagerduty.APIObject) bool {
+	if len(ids) != len(apiObject) {
+		return false
+	}
+	for i, id := range ids {
+		if !id.compareAPIObject(apiObject[i]) {
+			return false
+		}
+	}
+	return true
 }

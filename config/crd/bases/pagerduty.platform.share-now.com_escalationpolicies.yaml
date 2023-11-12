@@ -36,6 +36,7 @@ spec:
             description: EscalationPolicySpec defines the desired state of EscalationPolicy
             properties:
               description:
+                default: ""
                 description: Description defines the description of the Escalation
                   Policy that will be created
                 type: string
