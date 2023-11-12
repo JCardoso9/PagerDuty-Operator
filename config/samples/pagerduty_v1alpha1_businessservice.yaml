@@ -9,4 +9,6 @@ metadata:
     app.kubernetes.io/created-by: pagerduty-operator
   name: businessservice-sample
 spec:
-  # TODO(user): Add fields here
+  name: Test-Joao-policy
+  description: Test-Joao description policy
+  point_of_contact: Joao
