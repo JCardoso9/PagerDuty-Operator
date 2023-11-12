@@ -32,6 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	pagerdutyv1alpha1 "gitlab.share-now.com/platform/pagerduty-operator/api/v1alpha1"
+	"gitlab.share-now.com/platform/pagerduty-operator/internal/business_service"
 	"gitlab.share-now.com/platform/pagerduty-operator/internal/escalation_policy"
 	"gitlab.share-now.com/platform/pagerduty-operator/internal/pdservice"
 	//+kubebuilder:scaffold:imports
@@ -65,7 +66,7 @@ func main() {
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Logger:                 setupLog.WithName("manager-of-pagerduty-controller"),
+		Logger:                 setupLog.WithName("PDOperator"),
 		Scheme:                 scheme,
 		MetricsBindAddress:     metricsAddr,
 		Port:                   9443,
@@ -103,6 +104,13 @@ func main() {
 		Recorder: mgr.GetEventRecorderFor("pagerduty-escalation-policy-controller"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "EscalationPolicy")
+		os.Exit(1)
+	}
+	if err = (&business_service.BusinessServiceReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "BusinessService")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder

@@ -177,6 +177,7 @@ func (e *SubroutineHandler) SetPagerDutyServiceCondition(conditionType pdv1alpha
 	}
 
 	// Same condition as before, stop processing
+	// TODO: Can probably simplify this if by only setting condition if on of these conditions is false...
 	if len(*conditions) > 0 && (*conditions)[0].Status == metav1.ConditionTrue && (*conditions)[0].Message == message {
 		err = e.StatusUpdate()
 		if err != nil {

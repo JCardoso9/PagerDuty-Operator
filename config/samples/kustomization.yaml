@@ -2,4 +2,5 @@
 resources:
 - pagerduty_v1alpha1_pagerdutyservice.yaml
 - pagerduty_v1alpha1_escalationpolicy.yaml
+- pagerduty_v1alpha1_businessservice.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples

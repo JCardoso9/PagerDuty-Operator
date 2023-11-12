@@ -27,7 +27,7 @@ As seen on the image, PagerDuty Services depend on Escalation Policies and Busin
 
 In terms of how the controllers for a specific resource are structured you can take a look at the top right corner of the image. Each controller has a reconciler which runs the Reconcile() function on a loop whenever there is a Kubernetes event on an observed object.
 
-This reconcile function will run a set of subroutines each time. These subroutines are idempotent functions which will perform certain actions depending on whether the event is relevant to them or not. As an example the basic Create subroutine will execute the creation of a Pagerduty object through the API whenever a new custom resource is created.
+This reconcile function will run a set of subroutines each time. These subroutines are idempotent functions which will perform certain actions depending on whether the event is relevant to them or not. As an example, the basic Create subroutine will execute the creation of a Pagerduty object through the API whenever a new custom resource is created.
 
 In order to decouple the Custom resources from the pagerduty API objects each controller will have an Adapter. This component is responsible for making sure that the information from the Custom resource in Kubernetes can be successfully translated to objects that PagerDuty API understands in order to make the necessary API calls.
 

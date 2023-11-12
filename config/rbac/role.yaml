@@ -35,6 +35,32 @@ rules:
 - apiGroups:
   - pagerduty.platform.share-now.com
   resources:
+  - businessservices
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - pagerduty.platform.share-now.com
+  resources:
+  - businessservices/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - pagerduty.platform.share-now.com
+  resources:
+  - businessservices/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - pagerduty.platform.share-now.com
+  resources:
   - escalationpolicies
   verbs:
   - create

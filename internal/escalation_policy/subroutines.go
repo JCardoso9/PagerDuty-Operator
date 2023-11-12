@@ -171,6 +171,7 @@ func (e *SubroutineHandler) SetEscalationPolicyCondition(conditionType v1alpha1.
 		return pd_utils.RequeueAfter(RequeWaitTime, err)
 	}
 
+	// TODO: Can probably simplify this if by only setting condition if on of these conditions is false...
 	if len(*conditions) > 0 && (*conditions)[0].Status == metav1.ConditionTrue && (*conditions)[0].Message == message {
 		err = e.StatusUpdate()
 		if err != nil {
