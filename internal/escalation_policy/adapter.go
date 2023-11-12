@@ -7,7 +7,6 @@ import (
 	"github.com/PagerDuty/go-pagerduty"
 	"github.com/go-logr/logr"
 	"gitlab.share-now.com/platform/pagerduty-operator/api/v1alpha1"
-	"gitlab.share-now.com/platform/pagerduty-operator/internal/typeinfo"
 )
 
 type Adapter interface {
@@ -131,33 +130,7 @@ func (adapter *EPAdapter) EqualToUpstream(k8sPolicy v1alpha1.EscalationPolicy) (
 		k8sPolicy.Spec.Description == PDPolicy.Description &&
 		k8sPolicy.Spec.NumLoops == PDPolicy.NumLoops &&
 		k8sPolicy.Spec.OnCallHandoffNotifications == PDPolicy.OnCallHandoffNotifications &&
-		adapter.escalationRulesEqual(k8sPolicy.Spec.EscalationRules, PDPolicy.EscalationRules), nil
-}
-
-func (adapter *EPAdapter) escalationRulesEqual(k8sRules typeinfo.K8sEscalationRuleList, upstreamRules []pagerduty.EscalationRule) bool {
-
-	if len(k8sRules) != len(upstreamRules) {
-		return false
-	}
-
-	for i, rule := range k8sRules {
-
-		if !(rule.Delay == upstreamRules[i].Delay) {
-			return false
-		}
-
-		if len(rule.Targets) != len(upstreamRules[i].Targets) {
-			return false
-		}
-
-		for j, userID := range rule.Targets {
-			if string(userID) != upstreamRules[i].Targets[j].ID {
-				return false
-			}
-		}
-	}
-
-	return true
+		k8sPolicy.Spec.EscalationRules.CompareAPIObject(PDPolicy.EscalationRules), nil
 }
 
 func (adapter *EPAdapter) GetPDEscalationPolicy(id string) (*pagerduty.EscalationPolicy, error) {

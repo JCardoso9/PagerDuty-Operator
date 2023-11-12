@@ -18,6 +18,7 @@ import (
 
 const escalationPolicyFinalizer = "pagerduty.platform.share-now.com/escalation_policy"
 const escalationPolicyReady = "PDEscalationPolicyReady"
+const RequeWaitTime = time.Second * 10
 
 type SubroutineHandler struct {
 	EscalationPolicy *v1alpha1.EscalationPolicy
@@ -164,17 +165,17 @@ func (e *SubroutineHandler) SetEscalationPolicyCondition(conditionType v1alpha1.
 
 		err := e.StatusUpdate()
 		if err != nil {
-			e.Logger.Error(err, "Failed to update EscalationPolicy to false ready condition ")
+			e.Logger.Error(err, "Failed to update EscalationPolicy to false ready condition, Requeing in 10 seconds... ")
 		}
 
-		return pd_utils.RequeueAfter(time.Second*10, err)
+		return pd_utils.RequeueAfter(RequeWaitTime, err)
 	}
 
 	if len(*conditions) > 0 && (*conditions)[0].Status == metav1.ConditionTrue && (*conditions)[0].Message == message {
 		err = e.StatusUpdate()
 		if err != nil {
 			e.Logger.Error(err, "Failed to update EscalationPolicy to true ready condition ")
-			return pd_utils.RequeueAfter(time.Second*10, err)
+			return pd_utils.RequeueAfter(RequeWaitTime, err)
 		}
 		return pd_utils.StopProcessing()
 	}

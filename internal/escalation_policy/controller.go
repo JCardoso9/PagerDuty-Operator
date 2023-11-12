@@ -68,7 +68,7 @@ func (r *EscalationPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	}
 
 	subroutineHandler := &SubroutineHandler{
-		Logger:    log,
+		Logger:    log.WithName("escalation-policy controller"),
 		K8sClient: r.Client,
 		EPAdapter: &EPAdapter{
 			Logger:    log,
