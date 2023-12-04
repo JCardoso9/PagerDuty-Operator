@@ -22,6 +22,7 @@ import (
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
+	"github.com/PagerDuty/go-pagerduty"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -34,6 +35,7 @@ import (
 	pagerdutyv1alpha1 "gitlab.share-now.com/platform/pagerduty-operator/api/v1alpha1"
 	"gitlab.share-now.com/platform/pagerduty-operator/internal/business_service"
 	"gitlab.share-now.com/platform/pagerduty-operator/internal/escalation_policy"
+	ep "gitlab.share-now.com/platform/pagerduty-operator/internal/escalation_policy"
 	"gitlab.share-now.com/platform/pagerduty-operator/internal/pdservice"
 	//+kubebuilder:scaffold:imports
 )
@@ -102,6 +104,10 @@ func main() {
 		Client:   mgr.GetClient(),
 		Scheme:   mgr.GetScheme(),
 		Recorder: mgr.GetEventRecorderFor("pagerduty-escalation-policy-controller"),
+		Adapter: ep.EPAdapter{
+			Logger:    mgr.GetLogger().WithName("EP Adapter"),
+			PD_Client: pagerduty.NewClient(""),
+		},
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "EscalationPolicy")
 		os.Exit(1)

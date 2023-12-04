@@ -80,7 +80,8 @@ type EscalationPolicyStatus struct {
 	// PolicyID stores the ID of the Escalation Policy
 	PolicyID string `json:"policy_id,omitempty"`
 
-	// //	Conditions stores the conditions of the Escalation Policy
+	//	Conditions stores the conditions of the Escalation Policy
+	// +kubebuilder:default={}
 	Conditions []metav1.Condition `json:"conditions"`
 }
 

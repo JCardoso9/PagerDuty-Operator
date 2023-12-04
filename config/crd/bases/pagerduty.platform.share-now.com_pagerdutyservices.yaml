@@ -68,9 +68,10 @@ spec:
                 description: Description defines the description of the PagerDuty
                   service that will be created
                 type: string
-              escalation_policy:
-                description: EscalationPolicy defines the escalation policy that will
-                  attributed to the PagerDuty service
+              escalation_policy_ref:
+                description: EscalationPolicyName defines the name of the escalation
+                  policy in the cluster that will attributed to the PagerDuty service
+                minLength: 1
                 type: string
               name:
                 description: Name defines the name of the PagerDuty service that will
@@ -159,7 +160,13 @@ spec:
                   - type
                   type: object
                 type: array
+              escalation_policy_id:
+                default: ""
+                description: EscalationPolicyID stores the ID of the escalation policy
+                  that is attributed to the service
+                type: string
               service_id:
+                default: ""
                 description: ServiceID stores the ID of the created service
                 type: string
             required:

@@ -10,7 +10,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	"github.com/PagerDuty/go-pagerduty"
 	pagerdutyalpha1 "gitlab.share-now.com/platform/pagerduty-operator/api/v1alpha1"
 	"gitlab.share-now.com/platform/pagerduty-operator/internal/condition"
 	k8s_utils "gitlab.share-now.com/platform/pagerduty-operator/internal/k8s_utils"
@@ -22,6 +21,7 @@ type EscalationPolicyReconciler struct {
 	client.Client
 	Scheme   *runtime.Scheme
 	Recorder record.EventRecorder
+	Adapter  Adapter
 }
 
 type Subroutines interface {
@@ -68,12 +68,9 @@ func (r *EscalationPolicyReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	}
 
 	subroutineHandler := &SubroutineHandler{
-		Logger:    log.WithName("escalation-policy controller"),
-		K8sClient: r.Client,
-		EPAdapter: &EPAdapter{
-			Logger:    log,
-			PD_Client: pagerduty.NewClient(""),
-		},
+		Logger:           log.WithName("escalation-policy controller"),
+		K8sClient:        r.Client,
+		Adapter:          r.Adapter,
 		EscalationPolicy: policy,
 		conditionManager: condition.NewConditionManager(),
 	}
@@ -93,7 +90,7 @@ func (r *EscalationPolicyReconciler) ReconcileHandler(subroutines Subroutines) (
 		subroutines.AddFinalizer,
 		subroutines.ReconcileDeletion,
 		subroutines.ReconcileCreation,
-		subroutines.ReconcileUpdate,
+		// subroutines.ReconcileUpdate,
 	}
 	for _, operation := range operations {
 		result, err := operation()

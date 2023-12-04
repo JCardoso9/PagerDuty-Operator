@@ -7,14 +7,14 @@ metadata:
     app.kubernetes.io/part-of: pagerduty-operator
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: pagerduty-operator
-  name: my-policy
+  name: my-policy2
   namespace: pagerduty-operator-system
 spec:
-  name: Test-Joao-policy
+  name: Test-Joao-policy2
   description: Test-Joao description policy
   num_loops: 2
   escalation_rules: 
-    - escalation_delay_in_minutes: 10
+    - escalation_delay_in_minutes: 15
       targets:
         - P1NKFZC  
     # - escalation_delay_in_minutes: 20

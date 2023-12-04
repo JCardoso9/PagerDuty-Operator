@@ -6,6 +6,7 @@ import (
 	"github.com/PagerDuty/go-pagerduty"
 	"github.com/go-logr/logr"
 	"gitlab.share-now.com/platform/pagerduty-operator/api/v1alpha1"
+	"gitlab.share-now.com/platform/pagerduty-operator/internal/typeinfo"
 )
 
 type Adapter interface {
@@ -24,17 +25,17 @@ type PDServiceAdapter struct {
 
 var pdservice_reference_type string = "service"
 
-func (adapter *PDServiceAdapter) convertSpec(spec *v1alpha1.PagerdutyServiceSpec) pagerduty.Service {
-	return pagerduty.Service{
-		Name:                   spec.Name,
-		Description:            spec.Description,
-		AutoResolveTimeout:     spec.AutoResolveTimeout,
-		AcknowledgementTimeout: spec.AcknowledgementTimeout,
-		Status:                 spec.Status,
-		AlertCreation:          spec.AlertCreation,
-		EscalationPolicy:       spec.EscalationPolicyID.ToSpecificObject(),
-	}
-}
+// func (adapter *PDServiceAdapter) convertSpec(spec *v1alpha1.PagerdutyServiceSpec) pagerduty.Service {
+// 	return pagerduty.Service{
+// 		Name:                   spec.Name,
+// 		Description:            spec.Description,
+// 		AutoResolveTimeout:     spec.AutoResolveTimeout,
+// 		AcknowledgementTimeout: spec.AcknowledgementTimeout,
+// 		Status:                 spec.Status,
+// 		AlertCreation:          spec.AlertCreation,
+// 		EscalationPolicy:       spec.EscalationPolicyID.ToSpecificObject(),
+// 	}
+// }
 
 func (adapter *PDServiceAdapter) convert(pdService *v1alpha1.PagerdutyService) pagerduty.Service {
 	return pagerduty.Service{
@@ -48,18 +49,18 @@ func (adapter *PDServiceAdapter) convert(pdService *v1alpha1.PagerdutyService) p
 		AcknowledgementTimeout: pdService.Spec.AcknowledgementTimeout,
 		Status:                 pdService.Spec.Status,
 		AlertCreation:          pdService.Spec.AlertCreation,
-		EscalationPolicy:       pdService.Spec.EscalationPolicyID.ToSpecificObject(),
+		EscalationPolicy:       typeinfo.EscalationPolicyID(pdService.Status.EscalationPolicyID).ToSpecificObject(),
 	}
 }
 
-func (adapter *PDServiceAdapter) CreatePDService(k8sPDService *v1alpha1.PagerdutyServiceSpec) (string, error) {
+func (adapter *PDServiceAdapter) CreatePDService(k8sPDService *v1alpha1.PagerdutyService) (string, error) {
 	// Handle Escalation Policy
 	// Check if it exists in cluster, if so, add this service
 	// If not then create new escalation policy CRD and wait for it to be created
 	// Get Escalation Policy ID, update this service with the ID
 	// Finally you can create the service
 
-	res, err := adapter.PD_Client.CreateServiceWithContext(context.TODO(), adapter.convertSpec(k8sPDService))
+	res, err := adapter.PD_Client.CreateServiceWithContext(context.TODO(), adapter.convert(k8sPDService))
 	if err != nil {
 		adapter.Logger.Error(err, "PagerDuty Service creation unsuccessfull...")
 		return "", err
@@ -120,7 +121,6 @@ func (adapter *PDServiceAdapter) EqualToUpstream(k8sPDService *v1alpha1.Pagerdut
 		*convertedk8sPDService.AutoResolveTimeout == *PDService.AutoResolveTimeout &&
 		*convertedk8sPDService.AcknowledgementTimeout == *PDService.AcknowledgementTimeout &&
 		convertedk8sPDService.Status == PDService.Status &&
-		convertedk8sPDService.AlertCreation == PDService.AlertCreation, nil
-	// k8sService.EscalationPolicy.ID == upstreamService.EscalationPolicy.ID &&
-
+		convertedk8sPDService.AlertCreation == PDService.AlertCreation &&
+		convertedk8sPDService.EscalationPolicy.ID == PDService.EscalationPolicy.ID, nil
 }

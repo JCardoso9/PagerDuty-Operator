@@ -117,6 +117,12 @@ func (adapter *BSAdapter) EqualToUpstream(k8sBusinessService v1alpha1.BusinessSe
 		return false, err
 	}
 
+	if businessService.Team == nil {
+		return k8sBusinessService.Spec.Name == businessService.Name &&
+			k8sBusinessService.Spec.Description == businessService.Description &&
+			k8sBusinessService.Spec.PointOfContact == businessService.PointOfContact, nil
+	}
+
 	return k8sBusinessService.Spec.Name == businessService.Name &&
 		k8sBusinessService.Spec.Description == businessService.Description &&
 		k8sBusinessService.Spec.PointOfContact == businessService.PointOfContact &&

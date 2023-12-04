@@ -8,7 +8,8 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: pagerduty-operator
   name: businessservice-sample
+  namespace: pagerduty-operator-system
 spec:
-  name: Test-Joao-policy
-  description: Test-Joao description policy
+  name: Test-Joao11
+  description: Test-Joao description business service
   point_of_contact: Joao

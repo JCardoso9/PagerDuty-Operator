@@ -24,7 +24,7 @@ type SubroutineHandler struct {
 	EscalationPolicy *v1alpha1.EscalationPolicy
 	Logger           logr.Logger
 	K8sClient        client.Client
-	EPAdapter        *EPAdapter
+	Adapter          Adapter
 	conditionManager condition.Conditions
 }
 
@@ -36,13 +36,14 @@ func (e *SubroutineHandler) ReconcileCreation() (pd_utils.OperationResult, error
 		e.Logger.Info("Upstream Escalation Policy policy not found. Creating...")
 
 		// Handles creation of upstream policy
-		policyID, err := e.EPAdapter.CreateEscalationPolicy(&e.EscalationPolicy.Spec)
+		policyID, err := e.Adapter.CreateEscalationPolicy(&e.EscalationPolicy.Spec)
 		if err != nil {
 			e.Logger.Error(err, "Failed to create PD Escalation Policy")
 			return e.SetEscalationPolicyCondition(v1alpha1.ConditionReady, escalationPolicyReady, err, err.Error())
 		}
 
 		e.Logger.Info("Updating Escalation Policy status...")
+		e.Logger.Info(policyID)
 		// TODO: Update the rest of the policy status/spec
 		e.EscalationPolicy.Status.PolicyID = policyID
 		return e.SetEscalationPolicyCondition(v1alpha1.ConditionReady, escalationPolicyReady, nil, "Escalation policy created")
@@ -59,7 +60,7 @@ func (e *SubroutineHandler) ReconcileDeletion() (pd_utils.OperationResult, error
 
 		if e.policyIDExists() {
 			e.Logger.Info("Upstream policy found, making API deletion call for Escalation policy ...")
-			if err := e.EPAdapter.DeletePDEscalationPolicy(e.EscalationPolicy.Status.PolicyID); err != nil {
+			if err := e.Adapter.DeletePDEscalationPolicy(e.EscalationPolicy.Status.PolicyID); err != nil {
 				e.Logger.Error(err, "Failed to delete escalation policy")
 				return e.SetEscalationPolicyCondition(v1alpha1.ConditionReady, escalationPolicyReady, err, err.Error())
 			}
@@ -81,7 +82,7 @@ func (e *SubroutineHandler) ReconcileUpdate() (pd_utils.OperationResult, error) 
 		return pd_utils.ContinueProcessing()
 	}
 
-	equal, err := e.EPAdapter.EqualToUpstream(*e.EscalationPolicy)
+	equal, err := e.Adapter.EqualToUpstream(*e.EscalationPolicy)
 	if err != nil {
 		e.Logger.Error(err, "Failed to compare Escalation Policy spec with upstream policy")
 		return e.SetEscalationPolicyCondition(v1alpha1.ConditionReady, escalationPolicyReady, err, err.Error())
@@ -89,7 +90,7 @@ func (e *SubroutineHandler) ReconcileUpdate() (pd_utils.OperationResult, error) 
 
 	if !equal {
 		e.Logger.Info("Escalation Policy spec does not match upstream service. Updating...")
-		err := e.EPAdapter.UpdatePDEscalationPolicy(e.EscalationPolicy)
+		err := e.Adapter.UpdatePDEscalationPolicy(e.EscalationPolicy)
 
 		if err != nil {
 			e.Logger.Error(err, "Failed to update Escalation Policy")
@@ -191,6 +192,7 @@ func (e *SubroutineHandler) SetEscalationPolicyCondition(conditionType v1alpha1.
 func (e *SubroutineHandler) Initialization() (pd_utils.OperationResult, error) {
 	e.Logger.Info("Starting Initialization...")
 	if e.EscalationPolicy.Status.Conditions == nil {
+		e.Logger.Info("Creating status arrays...")
 		e.EscalationPolicy.Status.Conditions = []metav1.Condition{}
 
 		err := e.StatusUpdate()

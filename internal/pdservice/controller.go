@@ -30,6 +30,7 @@ type Subroutines interface {
 	ReconcileUpdate() (pd_utils.OperationResult, error)
 	Initialization() (pd_utils.OperationResult, error)
 	AddFinalizer() (pd_utils.OperationResult, error)
+	EnsureEscalationPolicy() (pd_utils.OperationResult, error)
 }
 
 // The following markers are used to generate the rules permissions (RBAC) on config/rbac using controller-gen
@@ -99,6 +100,7 @@ func (r *PagerdutyServiceReconciler) ReconcileHandler(subroutines Subroutines) (
 		subroutines.Initialization,
 		subroutines.AddFinalizer,
 		subroutines.ReconcileDeletion,
+		subroutines.EnsureEscalationPolicy,
 		subroutines.ReconcileCreation,
 		subroutines.ReconcileUpdate,
 	}

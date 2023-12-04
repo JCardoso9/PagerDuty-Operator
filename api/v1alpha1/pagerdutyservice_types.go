@@ -17,7 +17,6 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"gitlab.share-now.com/platform/pagerduty-operator/internal/typeinfo"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -61,10 +60,11 @@ type PagerdutyServiceSpec struct {
 	// +kubebuilder:default=active
 	Status string `json:"status,omitempty"`
 
-	// EscalationPolicy defines the escalation policy that will attributed to the PagerDuty service
+	// EscalationPolicyName defines the name of the escalation policy in the cluster that will attributed to the PagerDuty service
 	// +operator-sdk:csv:customresourcedefinitions:type=spec
 	// +kubebuilder:validation:Required
-	EscalationPolicyID typeinfo.EscalationPolicyID `json:"escalation_policy,omitempty"`
+	// +kubebuilder:validation:MinLength=1
+	EscalationPolicyName string `json:"escalation_policy_ref,omitempty"`
 
 	// Whether a service creates only incidents, or both alerts and incidents.
 	// A service must create alerts in order to enable incident merging.
@@ -88,7 +88,13 @@ type PagerdutyServiceStatus struct {
 
 	// +operator-sdk:csv:customresourcedefinitions:type=status
 	// ServiceID stores the ID of the created service
+	// +kubebuilder:default=""
 	ServiceID string `json:"service_id,omitempty"`
+
+	// EscalationPolicyID stores the ID of the escalation policy that is attributed to the service
+	// +operator-sdk:csv:customresourcedefinitions:type=status
+	// +kubebuilder:default=""
+	EscalationPolicyID string `json:"escalation_policy_id,omitempty"`
 
 	// // Conditions store the status conditions of the Service
 	Conditions []metav1.Condition `json:"conditions"`

@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: dockerhub.share-now.com/pagerduty-operator
-  newTag: 0.0.97
+  newTag: 0.0.105

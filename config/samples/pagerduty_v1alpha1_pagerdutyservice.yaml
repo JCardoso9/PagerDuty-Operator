@@ -10,6 +10,6 @@ metadata:
   name: my-service
   namespace: pagerduty-operator-system
 spec:
-  name: Test-Joao
+  name: Test-Joao1
   description: Test-Joao description
-  escalation_policy: PJLKMZK
+  escalation_policy_ref: my-policy2

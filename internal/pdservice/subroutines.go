@@ -9,7 +9,9 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 
 	"gitlab.share-now.com/platform/pagerduty-operator/api/v1alpha1"
 	pdv1alpha1 "gitlab.share-now.com/platform/pagerduty-operator/api/v1alpha1"
@@ -22,7 +24,7 @@ import (
 
 const pdServiceFinalizer = "pagerduty.platform.share-now.com/service"
 const pdServiceReady = "PDServiceReady"
-const RequeWaitTime = time.Second * 10
+const RequeWaitTime = time.Second * 20
 
 type SubroutineHandler struct {
 	PagerdutyService *v1alpha1.PagerdutyService
@@ -35,12 +37,11 @@ type SubroutineHandler struct {
 func (e *SubroutineHandler) ReconcileCreation() (pd_utils.OperationResult, error) {
 	e.Logger.Info("Reconcile PagerDuty Service Creation...")
 
-	// no upstream policy has been created yet
-	if !e.serviceIDExists() {
+	if !e.serviceIDExists() && e.escalationPolicyFound() {
 		e.Logger.Info("Upstream PagerDuty Service not found. Creating...")
 
 		// Handles creation of upstream policy
-		serviceID, err := e.PDServiceAdapter.CreatePDService(&e.PagerdutyService.Spec)
+		serviceID, err := e.PDServiceAdapter.CreatePDService(e.PagerdutyService)
 		if err != nil {
 			e.Logger.Error(err, "Failed to create PagerDuty Service")
 			return e.SetPagerDutyServiceCondition(pdv1alpha1.ConditionReady, pdServiceReady, err, err.Error())
@@ -52,6 +53,7 @@ func (e *SubroutineHandler) ReconcileCreation() (pd_utils.OperationResult, error
 		return e.SetPagerDutyServiceCondition(pdv1alpha1.ConditionReady, pdServiceReady, nil, "PagerDuty Service created")
 	}
 
+	e.Logger.Info("Reconcile PagerDuty Service Creation done...")
 	return pd_utils.ContinueProcessing()
 }
 
@@ -141,7 +143,7 @@ func (e *SubroutineHandler) removeFinalizer() error {
 	e.Logger.Info("Removing Finalizer for PagerDuty Service after successfully perform the operations")
 	if ok := controllerutil.RemoveFinalizer(e.PagerdutyService, pdServiceFinalizer); !ok {
 		e.Logger.Info("Failed to remove finalizer for PagerDuty Service")
-		return errors.New("Failed to remove finalizer for PagerDuty Service")
+		return errors.New("failed to remove finalizer for PagerDuty Service")
 	}
 
 	return e.K8sClient.Update(context.TODO(), e.PagerdutyService)
@@ -205,4 +207,59 @@ func (e *SubroutineHandler) Initialization() (pd_utils.OperationResult, error) {
 
 	e.Logger.Info("Initialization done...")
 	return pd_utils.ContinueProcessing()
+}
+
+func (e *SubroutineHandler) EnsureEscalationPolicy() (pd_utils.OperationResult, error) {
+
+	policy := &pdv1alpha1.EscalationPolicy{}
+
+	err := e.K8sClient.Get(context.Background(), types.NamespacedName{
+		Name:      e.PagerdutyService.Spec.EscalationPolicyName,
+		Namespace: e.PagerdutyService.Namespace,
+	}, policy)
+	if err != nil {
+		if apierrors.IsNotFound(err) {
+			// If the custom resource is not found then, it usually means that it was deleted or not created
+			// In this way, we will stop the reconciliation
+			e.Logger.Info("Escalation policy resource not found. Waiting some time to allow for creation of policy...")
+
+			if e.PagerdutyService.Status.EscalationPolicyID != "" {
+				e.Logger.Info("Removing reference from PagerDuty Service...")
+				e.PagerdutyService.Status.EscalationPolicyID = ""
+				err = e.StatusUpdate()
+
+				if err != nil {
+					e.Logger.Error(err, "Failed to update PagerDuty Service status")
+					return pd_utils.RequeueAfter(RequeWaitTime, err)
+				}
+			}
+
+			return e.SetPagerDutyServiceCondition(pdv1alpha1.ConditionReady, pdServiceReady, err, "Escalation policy resource not found. Waiting for some time to allow for creation of policy.")
+		}
+		// Error reading the object - requeue the request.
+		e.Logger.Info("Failed to get escalation policy")
+
+		return e.SetPagerDutyServiceCondition(pdv1alpha1.ConditionReady, pdServiceReady, err, err.Error())
+	}
+
+	if e.PagerdutyService.Status.EscalationPolicyID == policy.Status.PolicyID {
+		e.Logger.Info("No changes to escalation policy ID...")
+		return pd_utils.ContinueProcessing()
+	}
+
+	e.Logger.Info("Escalation policy ID changed, updating PagerDuty Service status...")
+	e.PagerdutyService.Status.EscalationPolicyID = policy.Status.PolicyID
+	err = e.StatusUpdate()
+
+	if err != nil {
+		e.Logger.Error(err, "Failed to update PagerDuty Service status")
+		return pd_utils.RequeueAfter(RequeWaitTime, err)
+	}
+
+	e.Logger.Info("EnsureEscalationPolicy finished...")
+	return pd_utils.StopProcessing()
+}
+
+func (e *SubroutineHandler) escalationPolicyFound() bool {
+	return e.PagerdutyService.Status.EscalationPolicyID != ""
 }
